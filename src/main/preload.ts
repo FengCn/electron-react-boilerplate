@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example';
+export type Channels = 'ipc-example' | 'robotjs';
 
 const electronHandler = {
   ipcRenderer: {
@@ -21,6 +21,23 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+    openWindow(id: number | undefined) {
+      ipcRenderer.send('webview-dom-ready', id);
+    },
+    handleUrl: (
+      callback: (
+        event: Electron.IpcRendererEvent,
+        ...args: any[]
+      ) => /* eslint no-unused-vars: off */
+      void
+    ) => ipcRenderer.on('update-url', callback),
+    handleMousePos: (
+      callback: (
+        event: Electron.IpcRendererEvent,
+        ...args: any[]
+      ) => /* eslint no-unused-vars: off */
+      void
+    ) => ipcRenderer.on('mouse-pos', callback),
   },
 };
 

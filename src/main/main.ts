@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  webContents,
+  globalShortcut,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -23,12 +30,52 @@ class AppUpdater {
   }
 }
 
+
+
+let p1: { x: number; y: number; }, p2, p3 = null
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('webview-dom-ready', (_, id) => {
+  const wc = webContents.fromId(id);
+  let redirectUrl = '';
+  wc.setWindowOpenHandler(({ url }) => {
+    const protocol = new URL(url).protocol;
+    if (['https:', 'http:'].includes(protocol)) {
+      // shell.openExternal(url);
+      // _.reply('webview-dom-ready', url)
+      redirectUrl = url;
+      console.log(redirectUrl);
+      mainWindow?.webContents?.send('update-url', redirectUrl);
+    }
+    return { action: 'deny' };
+  });
+});
+
+ipcMain.on('robotjs', async (event, args) => {
+  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  console.log(msgTemplate(args));
+  console.log(mainWindow?.getPosition());
+
+  let scaleFactor = require('electron').screen.getPrimaryDisplay().scaleFactor;
+  console.log(scaleFactor);
+
+  // BrowserWindow.getFocusedWindow()?.loadURL('http://www.douyin.com')
+  var robot = require('robotjs');
+
+  const pos = BrowserWindow.getFocusedWindow()?.getPosition();
+  // robot.moveMouse(
+  //   (pos[0] + 90) * scaleFactor,
+  //   (pos[1] + 350) * scaleFactor + 400
+  // );
+  robot.moveMouse(p1.x, p1.y)
+  robot.mouseClick();
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -71,15 +118,21 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1920,
+    height: 1080,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      webviewTag: true,
+      webSecurity: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
+    minWidth: 1024,
+    minHeight: 728,
   });
+
+  // mainWindow.maximize();
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -124,10 +177,35 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('will-quit', () => {
+  // Unregister a shortcut.
+  globalShortcut.unregister('CommandOrControl+X')
+
+  // Unregister all shortcuts.
+  globalShortcut.unregisterAll()
+})
+
 app
   .whenReady()
   .then(() => {
     createWindow();
+
+    // Register a 'CommandOrControl+X' shortcut listener.
+    const ret = globalShortcut.register('CommandOrControl+X', () => {
+      console.log('CommandOrControl+X is pressed');
+      var robot = require('robotjs');
+      p1 = robot.getMousePos()
+      console.log(p1);
+      mainWindow?.webContents?.send('mouse-pos', ['p1', p1]);
+    });
+
+    if (!ret) {
+      console.log('registration failed');
+    }
+
+    // Check whether a shortcut is registered.
+    console.log(globalShortcut.isRegistered('CommandOrControl+X'));
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
