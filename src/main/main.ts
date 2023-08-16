@@ -30,9 +30,9 @@ class AppUpdater {
   }
 }
 
-
-
-let p1: { x: number; y: number; }, p2, p3 = null
+let p1: { x: number; y: number },
+  p2,
+  p3 = null;
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -58,24 +58,64 @@ ipcMain.on('webview-dom-ready', (_, id) => {
   });
 });
 
+const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
+const ac = new AbortController();
+const signal = ac.signal;
+
 ipcMain.on('robotjs', async (event, args) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(args));
   console.log(mainWindow?.getPosition());
+  console.log(args);
+  switch (args[0]) {
+    case 'enter-room':
+      let scaleFactor =
+        require('electron').screen.getPrimaryDisplay().scaleFactor;
+      console.log(scaleFactor);
 
-  let scaleFactor = require('electron').screen.getPrimaryDisplay().scaleFactor;
-  console.log(scaleFactor);
+      // BrowserWindow.getFocusedWindow()?.loadURL('http://www.douyin.com')
+      var robot = require('robotjs');
 
-  // BrowserWindow.getFocusedWindow()?.loadURL('http://www.douyin.com')
-  var robot = require('robotjs');
+      const pos = BrowserWindow.getFocusedWindow()?.getPosition();
+      // robot.moveMouse(
+      //   (pos[0] + 90) * scaleFactor,
+      //   (pos[1] + 350) * scaleFactor + 400
+      // );
+      robot.moveMouse(p1.x, p1.y);
+      robot.mouseClick();
+      await setTimeoutPromise(
+        10000,
+        function (resolve, reject) {
+          console.log('22222');
+          resolve('done');
+        },
+        { signal }
+      )
+        .then(console.log)
+        .catch((err) => {
+          if (err.name === 'AbortError')
+            console.error('The timeout was aborted');
+        });
+      console.log('sleep...');
+      await setTimeoutPromise(10000, 'foobar', { signal })
+        .then(console.log)
+        .catch((err) => {
+          if (err.name === 'AbortError')
+            console.error('The timeout was aborted');
+        });
+      console.log('wake up...');
+      robot.moveMouse(500, 500);
+      robot.mouseClick();
 
-  const pos = BrowserWindow.getFocusedWindow()?.getPosition();
-  // robot.moveMouse(
-  //   (pos[0] + 90) * scaleFactor,
-  //   (pos[1] + 350) * scaleFactor + 400
-  // );
-  robot.moveMouse(p1.x, p1.y)
-  robot.mouseClick();
+      break;
+    case 'stop':
+      console.log('ac abort');
+      ac.abort('stop');
+      break;
+
+    default:
+      break;
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -179,11 +219,11 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   // Unregister a shortcut.
-  globalShortcut.unregister('CommandOrControl+X')
+  globalShortcut.unregister('CommandOrControl+X');
 
   // Unregister all shortcuts.
-  globalShortcut.unregisterAll()
-})
+  globalShortcut.unregisterAll();
+});
 
 app
   .whenReady()
@@ -194,7 +234,7 @@ app
     const ret = globalShortcut.register('CommandOrControl+X', () => {
       console.log('CommandOrControl+X is pressed');
       var robot = require('robotjs');
-      p1 = robot.getMousePos()
+      p1 = robot.getMousePos();
       console.log(p1);
       mainWindow?.webContents?.send('mouse-pos', ['p1', p1]);
     });
