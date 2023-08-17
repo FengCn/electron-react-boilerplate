@@ -1,5 +1,6 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
+import './App.css';
 import 'tailwindcss/tailwind.css';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { WebviewTag, ipcRenderer } from 'electron';
@@ -74,31 +75,57 @@ function Hello() {
 
   return (
     <div className="h-full flex bg-slate-950">
-      <div className="justify-center content-center flex-1">
+      <div className="flex flex-col justify-center content-center flex-1">
         <webview
           ref={webviewRef}
           src="http://www.douyin.com"
           autosize="true"
           allowpopups="true"
-          style={{ minHeight: '960px' }}
+          style={{ minHeight: '960px', flex: '1 1 0%' }}
         ></webview>
-        <div className="justify-center text-white h-24">
-          <button
-            type="button"
-            onClick={() => {
-              window.electron.ipcRenderer.sendMessage('robotjs', ['stop']);
-            }}
-            className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          >
+        <div className="flex justify-center text-white h-24">
+          <label className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+            <input
+              type="checkbox"
+              onChange={(e) => {
+                window.electron.ipcRenderer.sendMessage('robotjs', [
+                  e.target.checked ? 'play' : 'pause',
+                ]);
+              }}
+            />
+
+            {/* <!-- pause svg --> */}
             <svg
-              className="fill-current w-4 h-4 mr-2"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              className="swap-on h-12 w-12 fill-current"
             >
-              <path d="M11.25 12.75V18H12.75V12.75H18V11.25H12.75V6H11.25V11.25H6V12.75H11.25Z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+              />
             </svg>
-            Stop
-          </button>
+
+            {/* <!-- play svg --> */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              className="swap-off h-12 w-12 fill-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+              />
+            </svg>
+          </label>
         </div>
       </div>
 

@@ -45,7 +45,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
 ipcMain.on('webview-dom-ready', (_, id) => {
   const wc = webContents.fromId(id);
   let redirectUrl = '';
-  wc.setWindowOpenHandler(({ url }) => {
+  wc?.setWindowOpenHandler(({ url }) => {
     const protocol = new URL(url).protocol;
     if (['https:', 'http:'].includes(protocol)) {
       // shell.openExternal(url);
@@ -59,8 +59,7 @@ ipcMain.on('webview-dom-ready', (_, id) => {
 });
 
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
-const ac = new AbortController();
-const signal = ac.signal;
+let ac = new AbortController();
 
 ipcMain.on('robotjs', async (event, args) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -83,21 +82,14 @@ ipcMain.on('robotjs', async (event, args) => {
       // );
       robot.moveMouse(p1.x, p1.y);
       robot.mouseClick();
-      await setTimeoutPromise(
-        10000,
-        function (resolve, reject) {
-          console.log('22222');
-          resolve('done');
-        },
-        { signal }
-      )
+      await setTimeoutPromise(10000, 'football', { signal: ac.signal })
         .then(console.log)
         .catch((err) => {
           if (err.name === 'AbortError')
             console.error('The timeout was aborted');
         });
       console.log('sleep...');
-      await setTimeoutPromise(10000, 'foobar', { signal })
+      await setTimeoutPromise(10000, 'foobar', { signal: ac.signal })
         .then(console.log)
         .catch((err) => {
           if (err.name === 'AbortError')
@@ -111,6 +103,29 @@ ipcMain.on('robotjs', async (event, args) => {
     case 'stop':
       console.log('ac abort');
       ac.abort('stop');
+      break;
+    case 'play':
+      console.log('play');
+      ac = new AbortController();
+      await fetch('https://pro.xiaotuan.cn/api/polls/feo_user_list', {
+        signal: ac.signal,
+      })
+        .then((response) => response.json())
+        .then((jsonData) => console.log(jsonData))
+        .catch((reason) => {
+          console.log(reason);
+        });
+      await setTimeoutPromise(10000, '222222222222222', { signal: ac.signal })
+        .then(console.log)
+        .catch((err) => {
+          if (err.name === 'AbortError')
+            console.error('The timeout was aborted');
+        });
+
+      break;
+    case 'pause':
+      console.log('pause');
+      ac.abort();
       break;
 
     default:
@@ -159,7 +174,7 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1920,
-    height: 1080,
+    height: 1200,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       webviewTag: true,

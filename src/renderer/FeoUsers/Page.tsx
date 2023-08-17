@@ -63,12 +63,12 @@ function FeoUsers({ chooseUser }) {
               alt=""
             />
             <div className="min-w-0 flex-auto">
-              <p className="text-sm font-semibold leading-6 text-gray-900">
+              <p className="text-xs text-white">
                 <button onClick={() => chooseUser(person)}>
                   {person.aweme_user.nickname}
                 </button>
               </p>
-              <p className="mt-1 truncate text-xs leading-5 text-gray-500">
+              <p className="mt-1 truncate text-xs leading-5 text-gray-300">
                 {person.aweme_user.signature}
               </p>
             </div>

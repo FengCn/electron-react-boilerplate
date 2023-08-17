@@ -2,54 +2,66 @@
  * @NOTE: Prepend a `~` to css file paths that are in your node_modules
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
-body {
-  position: relative;
-  color: white;
-  height: 100vh;
-  background: linear-gradient(
-    200.96deg,
-    #fedc2a -29.09%,
-    #dd5789 51.77%,
-    #7a2c9e 129.35%
-  );
-  font-family: sans-serif;
-  overflow-y: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+
+
+/* CHECKBOX TOGGLE SWITCH */
+/* @apply rules for documentation, these do not work as inline style */
+.toggle-checkbox:checked {
+  @apply: right-0 border-green-400;
+  right: 0;
+  border-color: #68d391;
+}
+.toggle-checkbox:checked + .toggle-label {
+  @apply: bg-green-400;
+  background-color: #68d391;
 }
 
-button {
-  background-color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  appearance: none;
-  font-size: 1.3rem;
-  box-shadow: 0px 8px 28px -6px rgba(24, 39, 75, 0.12),
-    0px 18px 88px -4px rgba(24, 39, 75, 0.14);
-  transition: all ease-in 0.1s;
-  cursor: pointer;
-  opacity: 0.9;
+.swap {
+  @apply relative inline-grid cursor-pointer select-none place-content-center;
 }
 
-button:hover {
-  transform: scale(1.05);
-  opacity: 1;
+.swap > * {
+  @apply col-start-1 row-start-1 duration-300 ease-in-out;
+  transition-property: transform, opacity;
 }
 
-li {
-  list-style: none;
+.swap input[type="checkbox"] {
+  @apply sr-only appearance-none;
 }
 
-a {
-  text-decoration: none;
-  height: fit-content;
-  width: fit-content;
-  margin: 10px;
+.swap .swap-on,
+.swap .swap-indeterminate,
+.swap input:indeterminate ~ .swap-on {
+  @apply opacity-0;
 }
 
-a:hover {
-  opacity: 1;
-  text-decoration: none;
+.swap input:checked ~ .swap-off,
+.swap.swap-active .swap-off,
+.swap input:indeterminate ~ .swap-off {
+  @apply opacity-0;
+}
+
+.swap input:checked ~ .swap-on,
+.swap-active .swap-on,
+.swap input:indeterminate ~ .swap-indeterminate {
+  @apply opacity-100;
+}
+
+.swap-rotate .swap-on,
+.swap-rotate .swap-indeterminate,
+.swap-rotate input:indeterminate ~ .swap-on {
+  @apply rotate-45;
+}
+
+.swap-rotate input:checked ~ .swap-off,
+.swap-rotate.swap-active .swap-off,
+.swap-rotate input:indeterminate ~ .swap-off {
+  @apply -rotate-45;
+}
+
+.swap-rotate input:checked ~ .swap-on,
+.swap-rotate.swap-active .swap-on,
+.swap-rotate input:indeterminate ~ .swap-indeterminate {
+  @apply rotate-0;
 }
