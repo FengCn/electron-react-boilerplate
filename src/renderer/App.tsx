@@ -21,12 +21,13 @@ function Hello() {
     console.log('did-start-loading......');
   };
 
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+  const delay = (ms: number | undefined) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
-  const chooseUserHandle = async (p) => {
+  const chooseUserHandle = async (p: { aweme_user: { sec_uid: string } }) => {
     console.log(p);
     webviewRef.current?.loadURL(
-      'https://www.douyin.com/user/' + p.aweme_user.sec_uid
+      `https://www.douyin.com/user/${p.aweme_user.sec_uid}`
     );
     await delay(10000);
     console.log('Waited 10s');
@@ -56,14 +57,14 @@ function Hello() {
 
   useEffect(() => {
     webviewRef.current?.addEventListener('did-start-loading', loadstart);
-    webviewRef.current?.addEventListener('dom-ready', (e) => {
-      console.log('WebContentsId: ' + webviewRef.current?.getWebContentsId());
-      var wcId = webviewRef.current?.getWebContentsId();
+    webviewRef.current?.addEventListener('dom-ready', () => {
+      console.log(`WebContentsId: ${webviewRef.current?.getWebContentsId()}`);
+      const wcId = webviewRef.current?.getWebContentsId();
       window.electron.ipcRenderer.openWindow(wcId);
     });
   }, [webviewRef]);
 
-  const handleClick = (e) => {
+  const handleClick = (e: { preventDefault: () => void }) => {
     console.log(e);
     e.preventDefault();
     console.log('The link was clicked...');
@@ -79,12 +80,12 @@ function Hello() {
         <webview
           ref={webviewRef}
           src="http://www.douyin.com"
-          autosize="true"
-          allowpopups="true"
+          autosize
+          allowpopups
           style={{ minHeight: '960px', flex: '1 1 0%' }}
-        ></webview>
+        />
         <div className="flex justify-center text-white h-24">
-          <label className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+          <div className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
             <input
               type="checkbox"
               onChange={(e) => {
@@ -125,7 +126,7 @@ function Hello() {
                 d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
               />
             </svg>
-          </label>
+          </div>
         </div>
       </div>
 
