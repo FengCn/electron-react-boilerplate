@@ -82,7 +82,7 @@ function Hello() {
           src="http://www.douyin.com"
           autosize
           allowpopups
-          style={{ minHeight: '960px', flex: '1 1 0%' }}
+          style={{ flex: '1 1 0%' }}
         />
         <div className="flex justify-center text-white h-24">
           <div className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
