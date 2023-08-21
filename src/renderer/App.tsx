@@ -75,7 +75,7 @@ function Hello() {
   };
 
   return (
-    <div className="h-full flex bg-slate-950">
+    <div className="h-screen flex bg-slate-950">
       <div className="flex flex-col justify-center content-center flex-1">
         <webview
           ref={webviewRef}
