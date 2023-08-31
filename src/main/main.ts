@@ -30,9 +30,18 @@ class AppUpdater {
   }
 }
 
-let p1: { x: number; y: number },
-  p2,
-  p3 = null;
+let p1: { x: number; y: number };
+let p2: { x: number; y: number };
+let p3: { x: number; y: number };
+
+const fruits: Array<string> = [
+  '77777777777777777777777777777777777777777777777777',
+  '交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友交朋友谢谢 抠鼻',
+  '交朋友👬交朋友👬求关注交朋友👬交朋友👬求关注交朋友👬交朋友👬求关注交朋友👬交朋友👬求关注',
+  '有关必回！有关必回！有关必回！有关必回！有关必回！有关必回！有关必回！有关必回！有关必回！有关必回！',
+  '诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！诚信交友！',
+  '加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油加油',
+];
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -46,7 +55,7 @@ ipcMain.on('webview-dom-ready', (_, id) => {
   const wc = webContents.fromId(id);
   let redirectUrl = '';
   wc?.setWindowOpenHandler(({ url }) => {
-    const protocol = new URL(url).protocol;
+    const { protocol } = new URL(url);
     if (['https:', 'http:'].includes(protocol)) {
       // shell.openExternal(url);
       // _.reply('webview-dom-ready', url)
@@ -62,42 +71,26 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 let ac = new AbortController();
 
 ipcMain.on('robotjs', async (event, args) => {
+  const { clipboard } = require('electron');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(args));
   console.log(mainWindow?.getPosition());
   console.log(args);
   switch (args[0]) {
     case 'enter-room':
-      let scaleFactor =
-        require('electron').screen.getPrimaryDisplay().scaleFactor;
-      console.log(scaleFactor);
+      console.log(`enter-room`);
+      // let scaleFactor =
+      //   require('electron').screen.getPrimaryDisplay().scaleFactor;
+      // console.log(scaleFactor);
 
       // BrowserWindow.getFocusedWindow()?.loadURL('http://www.douyin.com')
-      var robot = require('robotjs');
+      // var robot = require('robotjs');
 
-      const pos = BrowserWindow.getFocusedWindow()?.getPosition();
+      // const pos = BrowserWindow.getFocusedWindow()?.getPosition();
       // robot.moveMouse(
       //   (pos[0] + 90) * scaleFactor,
       //   (pos[1] + 350) * scaleFactor + 400
       // );
-      robot.moveMouse(p1.x, p1.y);
-      robot.mouseClick();
-      await setTimeoutPromise(10000, 'football', { signal: ac.signal })
-        .then(console.log)
-        .catch((err) => {
-          if (err.name === 'AbortError')
-            console.error('The timeout was aborted');
-        });
-      console.log('sleep...');
-      await setTimeoutPromise(10000, 'foobar', { signal: ac.signal })
-        .then(console.log)
-        .catch((err) => {
-          if (err.name === 'AbortError')
-            console.error('The timeout was aborted');
-        });
-      console.log('wake up...');
-      robot.moveMouse(500, 500);
-      robot.mouseClick();
 
       break;
     case 'stop':
@@ -106,21 +99,105 @@ ipcMain.on('robotjs', async (event, args) => {
       break;
     case 'play':
       console.log('play');
+      var robot = require('robotjs');
       ac = new AbortController();
-      await fetch('https://pro.xiaotuan.cn/api/polls/feo_user_list', {
-        signal: ac.signal,
-      })
-        .then((response) => response.json())
-        .then((jsonData) => console.log(jsonData))
-        .catch((reason) => {
-          console.log(reason);
-        });
-      await setTimeoutPromise(10000, '222222222222222', { signal: ac.signal })
-        .then(console.log)
-        .catch((err) => {
-          if (err.name === 'AbortError')
-            console.error('The timeout was aborted');
-        });
+      while (!ac.signal.aborted) {
+        await fetch('https://pro.xiaotuan.cn/api/polls/feo_user_list', {
+          signal: ac.signal,
+        })
+          .then((response) => response.json())
+          .then((jsonData) => {
+            mainWindow?.webContents?.send('push-feo-users', [jsonData]);
+            var onlineOnly = jsonData.filter(function (entry, index) {
+              return entry.live_status == 1;
+            });
+            console.log(onlineOnly);
+            var greeting =
+              onlineOnly[Math.floor(Math.random() * onlineOnly.length)];
+            console.log(greeting.aweme_user.nickname);
+
+            for (let index = 0; index < jsonData.length; index++) {
+              const element = jsonData[index];
+              jsonData[index] =
+                element.id == greeting.id
+                  ? Object.assign(element, { selected: 1 })
+                  : Object.assign(element, { selected: 0 });
+            }
+
+            console.log(jsonData);
+
+            mainWindow?.webContents?.send(
+              'update-url',
+              `https://www.douyin.com/user/${greeting.aweme_user.sec_uid}`
+            );
+          })
+          .catch((reason) => {
+            console.log(reason);
+          });
+        await setTimeoutPromise(5000, '222222222222222', { signal: ac.signal })
+          .then(() => {
+            // 点击个人主页头像进入直播间
+            robot.moveMouse(p1.x, p1.y);
+            robot.mouseClick();
+          })
+          .catch((err) => {
+            if (err.name === 'AbortError')
+              console.error('The timeout was aborted');
+          });
+
+        await setTimeoutPromise(5000, '222222222222222', { signal: ac.signal })
+          .then(() => {
+            // 首次进入延时一点
+            console.log(`delay 5 secs`);
+          })
+          .catch((err) => {
+            if (err.name === 'AbortError')
+              console.error('The timeout was aborted');
+          });
+
+        for (let i = 0; i < 30; i++) {
+          if (ac.signal.aborted) {
+            console.log(`Signal aborted is: ? ${ac.signal.aborted}`);
+            break;
+          }
+          const random = Math.floor(Math.random() * fruits.length);
+          console.log(random, fruits[random]);
+          clipboard.writeText(fruits[random]);
+          await setTimeoutPromise(3000, '333333333333333', {
+            signal: ac.signal,
+          })
+            .then(() => {
+              robot.moveMouse(p2.x, p2.y);
+              robot.mouseClick();
+            })
+            .catch((err) => {
+              if (err.name === 'AbortError')
+                console.error('The timeout was aborted');
+            });
+
+          await setTimeoutPromise(1000, '333333333333333', {
+            signal: ac.signal,
+          })
+            .then(() => {
+              robot.keyTap('v', 'control');
+            })
+            .catch((err) => {
+              if (err.name === 'AbortError')
+                console.error('The timeout was aborted');
+            });
+          await setTimeoutPromise(1000, '333333333333333', {
+            signal: ac.signal,
+          })
+            .then(() => {
+              robot.keyTap('enter');
+              robot.keyTap('enter');
+            })
+            .catch((err) => {
+              if (err.name === 'AbortError')
+                console.error('The timeout was aborted');
+            });
+        }
+      }
 
       break;
     case 'pause':
@@ -246,20 +323,42 @@ app
     createWindow();
 
     // Register a 'CommandOrControl+X' shortcut listener.
-    const ret = globalShortcut.register('CommandOrControl+X', () => {
-      console.log('CommandOrControl+X is pressed');
-      var robot = require('robotjs');
-      p1 = robot.getMousePos();
-      console.log(p1);
-      mainWindow?.webContents?.send('mouse-pos', ['p1', p1]);
+    const shortcutsMousePos = [
+      'CommandOrControl+1',
+      'CommandOrControl+2',
+      'CommandOrControl+3',
+    ];
+    shortcutsMousePos.forEach((value) => {
+      let ret = globalShortcut.register(value, () => {
+        console.log(`${value} is pressed.`);
+        var robot = require('robotjs');
+        let pos = robot.getMousePos();
+        switch (value) {
+          case 'CommandOrControl+1':
+            p1 = pos;
+            mainWindow?.webContents?.send('mouse-pos', ['p1', p1]);
+            break;
+          case 'CommandOrControl+2':
+            p2 = pos;
+            mainWindow?.webContents?.send('mouse-pos', ['p2', p2]);
+            break;
+          case 'CommandOrControl+3':
+            p3 = pos;
+            mainWindow?.webContents?.send('mouse-pos', ['p3', p3]);
+            break;
+
+          default:
+            break;
+        }
+      });
+
+      if (!ret) {
+        console.log('registration failed');
+      }
+
+      // Check whether a shortcut is registered.
+      console.log(globalShortcut.isRegistered(value));
     });
-
-    if (!ret) {
-      console.log('registration failed');
-    }
-
-    // Check whether a shortcut is registered.
-    console.log(globalShortcut.isRegistered('CommandOrControl+X'));
 
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

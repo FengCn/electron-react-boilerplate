@@ -31,6 +31,7 @@
       "email": "amilajack@gmail.com",
       "url": "https://github.com/amilajack"
     }
+    
   ],
   "main": "./src/main/main.ts",
   "scripts": {

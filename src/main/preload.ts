@@ -38,7 +38,15 @@ const electronHandler = {
       ) => /* eslint no-unused-vars: off */
       void
     ) => ipcRenderer.on('mouse-pos', callback),
+    handlePushFeoUsers: (
+      callback: (
+        event: Electron.IpcRendererEvent,
+        ...args: any[]
+      ) => /* eslint no-unused-vars: off */
+      void
+    ) => ipcRenderer.on('push-feo-users', callback),
   },
+
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

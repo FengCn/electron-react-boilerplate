@@ -29,10 +29,10 @@ function Hello() {
     webviewRef.current?.loadURL(
       `https://www.douyin.com/user/${p.aweme_user.sec_uid}`
     );
-    await delay(10000);
-    console.log('Waited 10s');
-    const node = webviewRef.current?.querySelector('img.PbpHcHqa');
-    console.log(node);
+    // await delay(10000);
+    // console.log('Waited 10s');
+    // const node = webviewRef.current?.querySelector('img.PbpHcHqa');
+    // console.log(node);
 
     window.electron.ipcRenderer.sendMessage('robotjs', ['enter-room']);
   };
@@ -80,15 +80,16 @@ function Hello() {
         <webview
           ref={webviewRef}
           src="http://www.douyin.com"
-          autosize
-          allowpopups
+          autosize="true"
+          allowpopups="true"
           style={{ flex: '1 1 0%' }}
         />
         <div className="flex justify-center text-white h-24">
-          <div className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+          <label className="swap swap-rotate rounded-lg p-2.5 text-sm text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
             <input
               type="checkbox"
               onChange={(e) => {
+                console.log(e)
                 window.electron.ipcRenderer.sendMessage('robotjs', [
                   e.target.checked ? 'play' : 'pause',
                 ]);
@@ -126,7 +127,7 @@ function Hello() {
                 d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
               />
             </svg>
-          </div>
+          </label>
         </div>
       </div>
 

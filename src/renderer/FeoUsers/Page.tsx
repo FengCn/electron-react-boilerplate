@@ -13,6 +13,11 @@ interface people {
 function FeoUsers({ chooseUser }) {
   const [users, setUsers] = useState<people[]>([]);
 
+  window.electron.ipcRenderer.handlePushFeoUsers((e, args) => {
+    console.log(args);
+    setUsers(args[0])
+  });
+
   const fetchUsers = async () => {
     const resp = await fetch('https://pro.xiaotuan.cn/api/polls/feo_user_list');
     const data = await resp.json();
@@ -49,7 +54,7 @@ function FeoUsers({ chooseUser }) {
   }, []);
 
   return (
-    <ul role="list" className=" divide-y divide-gray-100 overflow-scroll">
+    <ul role="list" className=" divide-y divide-gray-100 overflow-scroll h-96">
       {users.map((person) => (
         <li key={person.id} className="flex justify-between gap-x-6 py-5">
           <div className="flex min-w-0 gap-x-4">
